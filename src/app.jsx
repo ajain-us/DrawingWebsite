@@ -58,27 +58,18 @@ export default function App() {
     setElements([...elements, rect]);
   };
 
-  const addText = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    ctx.font = "24px Arial";
-    const text = "Hello!";
-  
-    const textWidth = ctx.measureText(text).width;
-    const textHeight = 24; // Approximate height based on font size
-  
+  const addText = () => {  
     const textElement = {
       type: "text",
       name: "Text",
-      text,
+      text: "Edit Here",
       fontSize: 24, 
       x: 200,
       y: 200,
       color: "black",
-      width: textWidth,
-      height: textHeight,
+      width: 0,
+      height: 0,
     };
-  
     setElements([...elements, textElement]);
   };
 
@@ -144,9 +135,8 @@ export default function App() {
     if(draggingIndex.current !== null){
       const picked = elements[draggingIndex.current];
       movingOffset.current = {x: ((x-(picked.x))), y:((y-(picked.y)))}
-      const rest = elements.filter((_, idx) => idx !== draggingIndex.current);
-      setElements([...rest, picked]);
-      draggingIndex.current = elements.length-1;
+      //const rest = elements.filter((_, idx) => idx !== draggingIndex.current);
+      //setElements([...rest, picked]);
       setSelected(draggingIndex.current)
     }else{
       setSelected(null);
@@ -189,6 +179,36 @@ export default function App() {
     document.body.removeChild(link);
   };
 
+  const sendBack = () =>{
+    if(selected === 0){
+      return;
+    }
+    const updated = [...elements];
+    const temp =  updated[selected];
+    updated[selected] = updated[selected-1];
+    updated[selected-1] = temp;
+    setElements(updated);
+
+  }
+
+  const bringForwrd = () =>{
+    if(selected === (elements.length -1)){
+      return;
+    }
+    const updated = [...elements];
+    const temp = updated[selected];
+    updated[selected] = updated[selected+1];
+    updated[selected+1] = temp;
+    setElements(updated);
+  }
+
+  const deleteSelected = () =>{
+    const updated = [...elements];
+    updated.splice(selected, 1);
+    setElements(updated);
+    setSelected(null);
+  }
+
   return (
     <div>
       <button onClick={addRectangle}>Add Rectangle</button>
@@ -202,7 +222,7 @@ export default function App() {
           onMouseMove={onMouseMove}
           onMouseUp={onMouseUp}
         />
-        <span style={{ marginLeft: "20px", display: "flex", flexDirection: "column", alignItems: "center", border: "1px solid black", width: "300px", padding: "5px", gap: "5px"}}>
+        <span style={{ marginLeft: "20px", display: "flex", flexDirection: "column", alignItems: "center", border: "1px solid black", width: "300px", padding: "5px", gap: "10px"}}>
           <p id="status" style={{fontSize: "1.5em"}}> {selected === null ? "Nothing selected!": `Selected: ${elements[selected].name}`}</p>
           {selected !== null && 
             (<div> 
@@ -253,6 +273,14 @@ export default function App() {
                 style={{verticalAlign: "middle"}}/>
             </div>
 
+          )}
+          {selected !== null && (
+            <div>
+              <input type="button" onClick={sendBack} value="Send Back"/>
+              <input type="button" onClick={bringForwrd} value="Bring Forward"/>
+              <br></br>
+              <input type="button" onClick={deleteSelected} value="delete"/>
+            </div>
           )}
           <div>
             <p style={{display:"inline", fontSize: "1em"}}>Background color: </p>
