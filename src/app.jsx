@@ -26,22 +26,25 @@ export default function App() {
     ctx.fillRect(0, 0, 1000, 650);
 
     elements.forEach((el) => {
+      ctx.save();
+      ctx.translate(el.x, el.y);
+      ctx.rotate(el.angle * Math.PI / 180);
       if(selected !== null && elements[selected] === el){
         ctx.fillStyle = el.color;
         ctx.strokeStyle = 'red';
-        ctx.rect(el.x, el.type === "text"?(el.y - el.height) : el.y, el.width, el.height);
+        ctx.rect(0, el.type === "text"?(0 - el.height) : 0, el.width, el.height);
         ctx.stroke();
       }
+      ctx.fillStyle = el.color;
       if (el.type === "rect") {
-        ctx.fillStyle = el.color;
-        ctx.fillRect(el.x, el.y, el.width, el.height);
+        ctx.fillRect(0, 0, el.width, el.height);
       } else if (el.type === "text") {
-        ctx.fillStyle = el.color;
         ctx.font = `${el.fontSize}px Arial`;
-        ctx.fillText(el.text, el.x, el.y);
+        ctx.fillText(el.text, 0, 0);
         el.width = ctx.measureText(el.text).width;
         el.height = ctx.measureText(el.text).fontBoundingBoxAscent;
       }
+      ctx.restore();
     });
   };
 
@@ -54,6 +57,7 @@ export default function App() {
       width: 100,
       height: 100,
       color: "black",
+      angle: 0,
     };
     setElements([...elements, rect]);
   };
@@ -69,6 +73,7 @@ export default function App() {
       color: "black",
       width: 0,
       height: 0,
+      angle: 0,
     };
     setElements([...elements, textElement]);
   };
@@ -111,32 +116,41 @@ export default function App() {
     setElements(updated);
   }
 
+  const angleChange = (e) =>{
+    const updated = [...elements];
+    updated[selected].angle = parseInt(e.target.value);
+    setElements(updated);
+  }
+
   const onMouseDown = (e) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    
+    
   
     for (let i = elements.length - 1; i >= 0; i--) {
       const el = elements[i];
+      const dx = e.clientX - rect.left - el.x;
+      const dy = e.clientY - rect.top - el.y;
+      const angle = el.angle * Math.PI / 180;
+      const x = dx * Math.cos(-angle) - dy * Math.sin(-angle) + el.x;
+      const y = dx * Math.sin(-angle) + dy * Math.cos(-angle) + el.y;
       if (el.type === "rect") {
         if ( x >= el.x && x <= el.x + el.width && y >= el.y && y <= el.y + el.height) {
+          movingOffset.current = {x: ((x-(el.x))), y:((y-(el.y)))};
           draggingIndex.current = i;
           break;
         }
       } else if (el.type === "text") {
         const textTop = el.y - el.height; 
         if (x >= el.x && x <= el.x + el.width && y >= textTop && y <= textTop + el.height) {
+          movingOffset.current = {x: ((x-(el.x))), y:((y-(el.y)))};
           draggingIndex.current = i;
           break;
         }
       }
     }
     if(draggingIndex.current !== null){
-      const picked = elements[draggingIndex.current];
-      movingOffset.current = {x: ((x-(picked.x))), y:((y-(picked.y)))}
-      //const rest = elements.filter((_, idx) => idx !== draggingIndex.current);
-      //setElements([...rest, picked]);
       setSelected(draggingIndex.current)
     }else{
       setSelected(null);
@@ -153,9 +167,14 @@ export default function App() {
 
     const updated = [...elements];
     const el = updated[draggingIndex.current];
+    const angle = el.angle * Math.PI / 180;
+
+    const offsetX = movingOffset.current.x * Math.cos(angle) - movingOffset.current.y * Math.sin(angle);
+    const offsetY = movingOffset.current.x * Math.sin(angle) + movingOffset.current.y * Math.cos(angle);
+
     
-    el.x = x - movingOffset.current.x
-    el.y = y - movingOffset.current.y
+    el.x = x - offsetX;
+    el.y = y - offsetY;
     
     setElements([...updated]);
   };
@@ -188,7 +207,7 @@ export default function App() {
     updated[selected] = updated[selected-1];
     updated[selected-1] = temp;
     setElements(updated);
-
+    setSelected(selected-1)
   }
 
   const bringForwrd = () =>{
@@ -200,6 +219,7 @@ export default function App() {
     updated[selected] = updated[selected+1];
     updated[selected+1] = temp;
     setElements(updated);
+    setSelected(selected+1)
   }
 
   const deleteSelected = () =>{
@@ -214,16 +234,15 @@ export default function App() {
       <button onClick={addRectangle}>Add Rectangle</button>
       <button onClick={addText}>Add Text</button>
       <br></br>
-      <div style={{ display: "flex", marginTop: "10px"}}>
+      <div class="canvasDiv">
         <canvas
           ref={canvasRef}
-          style={{ border: "1px solid black" }}
           onMouseDown={onMouseDown}
           onMouseMove={onMouseMove}
           onMouseUp={onMouseUp}
         />
-        <span style={{ marginLeft: "20px", display: "flex", flexDirection: "column", alignItems: "center", border: "1px solid black", width: "300px", padding: "5px", gap: "10px"}}>
-          <p id="status" style={{fontSize: "1.5em"}}> {selected === null ? "Nothing selected!": `Selected: ${elements[selected].name}`}</p>
+        <span>
+          <p id="status"> {selected === null ? "Nothing selected!": `Selected: ${elements[selected].name}`}</p>
           {selected !== null && 
             (<div> 
               <p style={{display:"inline", fontSize: "1em"}}>Color: </p>
@@ -254,23 +273,23 @@ export default function App() {
           }
           {selected !== null && elements[selected].type === "rect" && 
             (<div>
-              <p style={{display:"inline", fontSize: "1em"}}>Height: </p>
+              <p>Height: </p>
               <input 
                 type="range"
-                min = "25"
+                min = "1"
                 max="650"
                 value={elements[selected].height}
                 onChange = {heightChange}
-                style={{verticalAlign: "middle"}}/>
+                />
                 <br></br>
-                <p style={{display:"inline", fontSize: "1em"}}>Width:  </p>
+                <p>Width:  </p>
                 <input 
                 type="range"
-                min = "25"
+                min = "1"
                 max="1000"
                 value={elements[selected].width}
                 onChange = {widthChange}
-                style={{verticalAlign: "middle"}}/>
+                />
             </div>
 
           )}
@@ -279,11 +298,19 @@ export default function App() {
               <input type="button" onClick={sendBack} value="Send Back"/>
               <input type="button" onClick={bringForwrd} value="Bring Forward"/>
               <br></br>
-              <input type="button" onClick={deleteSelected} value="delete"/>
+              <input type="button" onClick={deleteSelected} value="Delete Element"/>
+              <br></br>
+              <input 
+                type="range"
+                min = "1"
+                max="360"
+                value={elements[selected].angle}
+                onChange = {angleChange}
+              />  
             </div>
           )}
           <div>
-            <p style={{display:"inline", fontSize: "1em"}}>Background color: </p>
+            <p>Background color: </p>
             <input 
               type="color"
               onChange={backgroundColorChange}

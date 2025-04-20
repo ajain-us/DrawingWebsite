@@ -1,3 +1,79 @@
+body{
+    font-family: 'Helvetica', 'Arial', sans-serif;
+}
+
+button {
+    margin: 0.25em;
+    margin-bottom: 0.5em;
+    
+    width: 150px;
+    height: 45px;
+    background-color: white;
+
+    font-size: medium;
+    font-weight: bold;
+
+    border-radius: 5px;
+    border-style: solid;
+}
+
+button:active {
+    box-shadow: 0 3px #666;
+    transform: translateY(2px);
+}
+
+P{
+    display: inline;
+    font-size: 1em;
+}
+
+.canvasDiv{
+    display: flex;
+    margin-top: 10px;
+}
+
+canvas{
+    border: 1px solid black;
+}
+
+span{
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border: 1px solid black;
+    border-radius: 5px;
+    width: 300px;
+    padding: 5px;
+    gap: 10px;
+    background-color: rgba(0, 0, 0, 0.10);
+}
+
 #status{
-    font-size: 5em;
+    font-size: 1.5em;
+}
+
+input[type="button"]{
+    margin: 0.25em;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+
+    height: 22.5px;
+    background-color: white;
+
+    font-size: small;
+    font-weight: bold;
+
+    border-radius: 7px;
+    border-style: solid;
+}
+
+input[type="button"]:active {
+    box-shadow: 0 3px #666;
+    transform: translateY(2px);
+}
+
+input[type="range"]{
+    vertical-align: middle;
 }
