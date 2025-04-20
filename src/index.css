@@ -1,5 +1,6 @@
 body{
     font-family: 'Helvetica', 'Arial', sans-serif;
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 button {
@@ -15,6 +16,7 @@ button {
 
     border-radius: 5px;
     border-style: solid;
+    border-color: black;
 }
 
 button:active {
@@ -34,6 +36,7 @@ P{
 
 canvas{
     border: 1px solid black;
+    border-radius: 5px;
 }
 
 span{
@@ -67,6 +70,7 @@ input[type="button"]{
 
     border-radius: 7px;
     border-style: solid;
+    border-color: black;
 }
 
 input[type="button"]:active {

@@ -14,9 +14,6 @@ export default function App() {
     canvas.width = 1000;
     canvas.height = 650;
 
-    ctx.fillStyle = backgroundColor.current;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     drawAllElements(ctx);
   }, [elements, selected]);
 
@@ -29,20 +26,20 @@ export default function App() {
       ctx.save();
       ctx.translate(el.x, el.y);
       ctx.rotate(el.angle);
+      ctx.fillStyle = el.color;
+      if (el.type === "rect") {
+        ctx.fillRect(0, 0, el.width, el.height);
+      } else if (el.type === "text") {
+        ctx.font = `${el.fontSize}px px Helvetica, Arial, sans-serif`;
+        ctx.fillText(el.text, 0, 0);
+        el.width = ctx.measureText(el.text).width;
+        el.height = ctx.measureText(el.text).fontBoundingBoxAscent;
+      }
       if(selected !== null && elements[selected] === el){
         ctx.fillStyle = el.color;
         ctx.strokeStyle = 'red';
         ctx.rect(0, el.type === "text"?(0 - el.height) : 0, el.width, el.height);
         ctx.stroke();
-      }
-      ctx.fillStyle = el.color;
-      if (el.type === "rect") {
-        ctx.fillRect(0, 0, el.width, el.height);
-      } else if (el.type === "text") {
-        ctx.font = `${el.fontSize}px Arial`;
-        ctx.fillText(el.text, 0, 0);
-        el.width = ctx.measureText(el.text).width;
-        el.height = ctx.measureText(el.text).fontBoundingBoxAscent;
       }
       ctx.restore();
     });
@@ -89,7 +86,6 @@ export default function App() {
     const ctx = canvas.getContext("2d");
     const updated = [...elements];
     updated[selected].text = e.target.value;
-    updated[selected].width = ctx.measureText(e.target.value).width
     setElements(updated);
   }
   
