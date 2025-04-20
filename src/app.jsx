@@ -28,7 +28,7 @@ export default function App() {
     elements.forEach((el) => {
       ctx.save();
       ctx.translate(el.x, el.y);
-      ctx.rotate(el.angle * Math.PI / 180);
+      ctx.rotate(el.angle);
       if(selected !== null && elements[selected] === el){
         ctx.fillStyle = el.color;
         ctx.strokeStyle = 'red';
@@ -118,7 +118,7 @@ export default function App() {
 
   const angleChange = (e) =>{
     const updated = [...elements];
-    updated[selected].angle = parseInt(e.target.value);
+    updated[selected].angle = parseInt(e.target.value) * Math.PI / 180;
     setElements(updated);
   }
 
@@ -132,9 +132,8 @@ export default function App() {
       const el = elements[i];
       const dx = e.clientX - rect.left - el.x;
       const dy = e.clientY - rect.top - el.y;
-      const angle = el.angle * Math.PI / 180;
-      const x = dx * Math.cos(-angle) - dy * Math.sin(-angle) + el.x;
-      const y = dx * Math.sin(-angle) + dy * Math.cos(-angle) + el.y;
+      const x = dx * Math.cos(-el.angle) - dy * Math.sin(-el.angle) + el.x;
+      const y = dx * Math.sin(-el.angle) + dy * Math.cos(-el.angle) + el.y;
       if (el.type === "rect") {
         if ( x >= el.x && x <= el.x + el.width && y >= el.y && y <= el.y + el.height) {
           movingOffset.current = {x: ((x-(el.x))), y:((y-(el.y)))};
@@ -167,10 +166,9 @@ export default function App() {
 
     const updated = [...elements];
     const el = updated[draggingIndex.current];
-    const angle = el.angle * Math.PI / 180;
 
-    const offsetX = movingOffset.current.x * Math.cos(angle) - movingOffset.current.y * Math.sin(angle);
-    const offsetY = movingOffset.current.x * Math.sin(angle) + movingOffset.current.y * Math.cos(angle);
+    const offsetX = movingOffset.current.x * Math.cos(el.angle) - movingOffset.current.y * Math.sin(el.angle);
+    const offsetY = movingOffset.current.x * Math.sin(el.angle) + movingOffset.current.y * Math.cos(el.angle);
 
     
     el.x = x - offsetX;
@@ -302,9 +300,9 @@ export default function App() {
               <br></br>
               <input 
                 type="range"
-                min = "1"
-                max="360"
-                value={elements[selected].angle}
+                min = "0"
+                max={"360"}
+                value={elements[selected].angle * 180 / Math.PI}
                 onChange = {angleChange}
               />  
             </div>
